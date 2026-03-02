@@ -1,0 +1,38 @@
+<view class="container">
+  <!-- 顶部信息卡片 -->
+  <view class="info-card">
+    <text class="info-icon">🛡️</text>
+    <text class="info-title">隐私水印保护</text>
+    <text class="info-subtitle">完全本地处理，图片不上传，保护您的隐私安全</text>
+  </view>
+
+  <!-- 选图区域 -->
+  <view class="pick-area" bindtap="chooseImage">
+    <view class="pick-icon-wrap">
+      <text class="pick-icon">🖼️</text>
+    </view>
+    <text class="pick-text">选择一张图片</text>
+    <text class="pick-hint">支持 JPG, PNG 格式</text>
+  </view>
+
+  <!-- 核心优势 -->
+  <view class="advantage-section">
+    <text class="advantage-label">核心优势</text>
+    <view class="advantage-list">
+      <view class="advantage-card">
+        <text class="advantage-icon">🔒</text>
+        <view class="advantage-text">
+          <text class="advantage-title">数据绝对安全</text>
+          <text class="advantage-desc">全程离线，无服务器，图片从不离开您的手机</text>
+        </view>
+      </view>
+      <view class="advantage-card">
+        <text class="advantage-icon">⚡</text>
+        <view class="advantage-text">
+          <text class="advantage-title">极速生成导出</text>
+          <text class="advantage-desc">本地渲染，秒级生成高清水印图片</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

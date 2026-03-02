@@ -1,0 +1,19 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/editor/editor"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#1a1a2e",
+    "navigationBarTitleText": "隐私水印",
+    "navigationBarTextStyle": "white"
+  },
+  "permission": {
+    "scope.writePhotosAlbum": {
+      "desc": "保存添加水印后的图片到相册"
+    }
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2"
+}

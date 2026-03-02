@@ -1,0 +1,99 @@
+<view class="container">
+  <!-- 预览区 -->
+  <view class="preview-area">
+    <view class="canvas-container">
+      <canvas id="watermarkCanvas" type="2d" class="canvas" />
+    </view>
+  </view>
+
+  <!-- 控制面板 -->
+  <scroll-view class="control-panel" scroll-y>
+    <!-- 拖动指示条 -->
+    <view class="drag-indicator" />
+
+    <!-- 水印文字 -->
+    <view class="section">
+      <text class="section-label"><text class="label-prefix">T</text> 水印文字</text>
+      <input
+        class="text-input"
+        value="{{text}}"
+        placeholder="仅供验证使用，他用无效"
+        maxlength="20"
+        bindinput="onTextInput"
+      />
+    </view>
+
+    <!-- 水印颜色 -->
+    <view class="section">
+      <text class="section-label">水印颜色</text>
+      <view class="color-list">
+        <view
+          wx:for="{{colors}}"
+          wx:key="value"
+          class="color-dot {{currentColor === item.value ? 'active' : ''}}"
+          style="background:{{item.value}};border-color:{{item.border}}"
+          bindtap="onColorChange"
+          data-color="{{item.value}}"
+        />
+      </view>
+    </view>
+
+    <!-- 透明度 -->
+    <view class="section">
+      <text class="section-label">≡ 透明度 ({{opacityDisplay}}%)</text>
+      <slider
+        min="5" max="80"
+        value="{{opacityDisplay}}"
+        activeColor="#7C4DFF"
+        block-color="#7C4DFF"
+        block-size="20"
+        bindchange="onOpacityChange"
+      />
+    </view>
+
+    <!-- 水印大小 -->
+    <view class="section">
+      <text class="section-label">□ 水印大小</text>
+      <slider
+        min="12" max="60"
+        value="{{fontSize}}"
+        activeColor="#7C4DFF"
+        block-color="#7C4DFF"
+        block-size="20"
+        bindchange="onFontSizeChange"
+      />
+    </view>
+
+    <!-- 分布间距 -->
+    <view class="section">
+      <text class="section-label">⊹ 分布间距</text>
+      <slider
+        min="5" max="20"
+        step="1"
+        value="{{spacing}}"
+        activeColor="#7C4DFF"
+        block-color="#7C4DFF"
+        block-size="20"
+        bindchange="onSpacingChange"
+      />
+    </view>
+
+    <!-- 倾斜角度 -->
+    <view class="section">
+      <text class="section-label">↺ 倾斜角度 ({{angle}}°)</text>
+      <slider
+        min="-90" max="90"
+        value="{{angle}}"
+        activeColor="#7C4DFF"
+        block-color="#7C4DFF"
+        block-size="20"
+        bindchange="onAngleChange"
+      />
+    </view>
+  </scroll-view>
+
+  <!-- 底部固定保存按钮 -->
+  <view class="bottom-bar">
+    <button class="btn-save" bindtap="saveImage">⬇ 保存到相册</button>
+  </view>
+</view>
