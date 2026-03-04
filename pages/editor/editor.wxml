@@ -1,115 +1,128 @@
-<view class="page" style="display: flex; box-sizing: content-box">
-  <scroll-view class="content" scroll-y 
-    style="display: block; box-sizing: border-box">
+<view class="page">
+  <view class="preview-shell">
     <view class="preview-card">
       <view class="canvas-stage">
         <canvas id="watermarkCanvas" type="2d" class="canvas" />
       </view>
     </view>
+  </view>
 
-    <view class="content-box">
+  <view class="control-sheet {{sheetDragging ? 'dragging' : ''}}" style="height: {{sheetHeightVh}}vh;">
+    <view
+      class="sheet-handle-wrap"
+      bindtap="toggleSheet"
+      bindtouchstart="onSheetDragStart"
+      bindtouchmove="onSheetDragMove"
+      bindtouchend="onSheetDragEnd"
+      bindtouchcancel="onSheetDragEnd"
+    >
+      <view class="sheet-handle"></view>
+    </view>
+    <scroll-view class="sheet-scroll" scroll-y>
+      <view class="content-box">
 
-      <view class="section">
-        <view class="section-title-row">
-          <text class="section-icon section-icon-emphasis">T</text>
-          <text class="section-title">水印文字</text>
+        <view class="section">
+          <view class="section-title-row">
+            <text class="section-icon section-icon-emphasis">T</text>
+            <text class="section-title">水印文字</text>
+          </view>
+          <input
+            class="text-input"
+            value="{{text}}"
+            placeholder="仅供验证使用，他用无效"
+            placeholder-style="color:#99a1af;"
+            maxlength="20"
+            bindinput="onTextInput"
+          />
         </view>
-        <input
-          class="text-input"
-          value="{{text}}"
-          placeholder="仅供验证使用，他用无效"
-          placeholder-style="color:#99a1af;"
-          maxlength="20"
-          bindinput="onTextInput"
-        />
-      </view>
 
-      <view class="section">
-        <text class="section-title">字体颜色</text>
-        <view class="color-list">
-          <view
-            wx:for="{{colors}}"
-            wx:key="value"
-            class="color-dot {{currentColor === item.value ? 'active' : ''}}"
-            style="background:{{item.value}};border-color:{{item.border}}"
-            bindtap="onColorChange"
-            data-color="{{item.value}}"
+        <view class="section">
+          <text class="section-title">字体颜色</text>
+          <view class="color-list">
+            <view
+              wx:for="{{colors}}"
+              wx:key="value"
+              class="color-dot {{currentColor === item.value ? 'active' : ''}}"
+              style="background:{{item.value}};border-color:{{item.border}}"
+              bindtap="onColorChange"
+              data-color="{{item.value}}"
+            />
+          </view>
+        </view>
+
+        <view class="section">
+          <view class="section-title-row">
+            <text class="section-icon">◫</text>
+            <text class="section-title">透明度 ({{opacityDisplay}}%)</text>
+          </view>
+          <slider
+            min="5"
+            max="100"
+            value="{{opacityDisplay}}"
+            activeColor="#8b5cf6"
+            backgroundColor="#d1d5db"
+            block-color="#8b5cf6"
+            block-size="18"
+            bindchange="onOpacityChange"
+          />
+        </view>
+
+        <view class="section">
+          <view class="section-title-row">
+            <text class="section-icon">□</text>
+            <text class="section-title">字体大小 ({{fontSize}}px)</text>
+          </view>
+          <slider
+            min="12"
+            max="60"
+            value="{{fontSize}}"
+            activeColor="#8b5cf6"
+            backgroundColor="#d1d5db"
+            block-color="#8b5cf6"
+            block-size="18"
+            bindchange="onFontSizeChange"
+          />
+        </view>
+
+        <view class="section">
+          <view class="section-title-row">
+            <text class="section-icon">⊹</text>
+            <text class="section-title">间距 ({{spacing}}px)</text>
+          </view>
+          <slider
+            min="0"
+            max="80"
+            step="1"
+            value="{{spacing}}"
+            activeColor="#8b5cf6"
+            backgroundColor="#d1d5db"
+            block-color="#8b5cf6"
+            block-size="18"
+            bindchange="onSpacingChange"
+          />
+        </view>
+
+        <view class="section section-last">
+          <view class="section-title-row">
+            <text class="section-icon">↺</text>
+            <text class="section-title">倾斜角度 ({{angle}}°)</text>
+          </view>
+          <slider
+            min="-90"
+            max="90"
+            value="{{angle}}"
+            activeColor="#8b5cf6"
+            backgroundColor="#d1d5db"
+            block-color="#8b5cf6"
+            block-size="18"
+            bindchange="onAngleChange"
           />
         </view>
       </view>
+    </scroll-view>
 
-      <view class="section">
-        <view class="section-title-row">
-          <text class="section-icon">◫</text>
-          <text class="section-title">透明度 ({{opacityDisplay}}%)</text>
-        </view>
-        <slider
-          min="5"
-          max="100"
-          value="{{opacityDisplay}}"
-          activeColor="#8b5cf6"
-          backgroundColor="#d1d5db"
-          block-color="#8b5cf6"
-          block-size="18"
-          bindchange="onOpacityChange"
-        />
-      </view>
-
-      <view class="section">
-        <view class="section-title-row">
-          <text class="section-icon">□</text>
-          <text class="section-title">字体大小 ({{fontSize}}px)</text>
-        </view>
-        <slider
-          min="12"
-          max="60"
-          value="{{fontSize}}"
-          activeColor="#8b5cf6"
-          backgroundColor="#d1d5db"
-          block-color="#8b5cf6"
-          block-size="18"
-          bindchange="onFontSizeChange"
-        />
-      </view>
-
-      <view class="section">
-        <view class="section-title-row">
-          <text class="section-icon">⊹</text>
-          <text class="section-title">间距 ({{spacing}}px)</text>
-        </view>
-        <slider
-          min="0"
-          max="80"
-          step="1"
-          value="{{spacing}}"
-          activeColor="#8b5cf6"
-          backgroundColor="#d1d5db"
-          block-color="#8b5cf6"
-          block-size="18"
-          bindchange="onSpacingChange"
-        />
-      </view>
-
-      <view class="section section-last">
-        <view class="section-title-row">
-          <text class="section-icon">↺</text>
-          <text class="section-title">倾斜角度 ({{angle}}°)</text>
-        </view>
-        <slider
-          min="-90"
-          max="90"
-          value="{{angle}}"
-          activeColor="#8b5cf6"
-          backgroundColor="#d1d5db"
-          block-color="#8b5cf6"
-          block-size="18"
-          bindchange="onAngleChange"
-        />
-      </view>
+    <view class="sheet-footer">
+      <button class="btn-save" bindtap="saveImage">↓ 保存到相册</button>
     </view>
-  </scroll-view>
-
-  <view class="bottom-bar">
-    <button class="btn-save" bindtap="saveImage">↓ 保存到相册</button>
   </view>
 </view>

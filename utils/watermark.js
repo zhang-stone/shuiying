@@ -13,7 +13,9 @@
  * @param {string} options.text     - 水印文字
  * @param {number} options.fontSize - 字号 (px)
  * @param {number} options.opacity  - 透明度 0~1
- * @param {number} options.spacing  - 文字额外间距（px）
+ * @param {number} options.spacing  - 文字额外间距（px，兼容写法）
+ * @param {number} options.spacingX - 横向额外间距（px）
+ * @param {number} options.spacingY - 竖向额外间距（px）
  * @param {number} options.angle    - 倾斜角度 (度)
  * @param {string} options.color    - 字体颜色 (CSS 颜色值)
  * @param {string} options.imageFit - 图片适配方式，默认 contain
@@ -28,6 +30,8 @@ function drawWatermark(options) {
     fontSize = 24,
     opacity = 0.2,
     spacing = 0,
+    spacingX = spacing,
+    spacingY = spacing,
     angle = -30,
     color = '#000000',
     imageFit = 'contain',
@@ -77,9 +81,10 @@ function drawWatermark(options) {
   const diagW = Math.abs(textW * Math.cos(rad)) + Math.abs(textH * Math.sin(rad))
   const diagH = Math.abs(textW * Math.sin(rad)) + Math.abs(textH * Math.cos(rad))
 
-  const gapPx = clampNumber(spacing, 0, 200, 0)
-  const spacingX = Math.max(minStepPx, diagW + gapPx)
-  const spacingY = Math.max(minStepPx, diagH + gapPx)
+  const gapXPx = clampNumber(spacingX, 0, 200, 0)
+  const gapYPx = clampNumber(spacingY, 0, 200, 0)
+  const stepX = Math.max(minStepPx, diagW + gapXPx)
+  const stepY = Math.max(minStepPx, diagH + gapYPx)
 
   // 扩展范围防止旋转后边缘空白
   const expandRange = Math.max(drawRect.width, drawRect.height)
@@ -101,8 +106,8 @@ function drawWatermark(options) {
 
   let tileCount = 0
   let exceededMaxTiles = false
-  for (let y = startY; y < endY; y += spacingY) {
-    for (let x = startX; x < endX; x += spacingX) {
+  for (let y = startY; y < endY; y += stepY) {
+    for (let x = startX; x < endX; x += stepX) {
       if (tileCount >= maxTiles) {
         exceededMaxTiles = true
         break

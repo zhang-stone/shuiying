@@ -3,6 +3,10 @@ const { authorizeWritePhotosAlbum } = require('../../utils/permission')
 
 const DEFAULT_SPACING = 0
 const MAX_EXPORT_SIDE = 4096
+const SHEET_HALF_VH = 42
+const SHEET_EXPANDED_VH = 72
+const SHEET_MIN_VH = 36
+const SHEET_MAX_VH = 78
 
 const DEFAULT_PARAMS = {
   text: '仅供查阅',
@@ -16,6 +20,9 @@ const DEFAULT_PARAMS = {
 Page({
   data: {
     imagePath: '',
+    sheetExpanded: false,
+    sheetDragging: false,
+    sheetHeightVh: SHEET_HALF_VH,
     text: DEFAULT_PARAMS.text,
     fontSize: DEFAULT_PARAMS.fontSize,
     opacityDisplay: DEFAULT_PARAMS.opacityDisplay,
@@ -41,6 +48,9 @@ Page({
   _renderTimer: null,
   _isRendering: false,
   _renderQueued: false,
+  _dragStartY: 0,
+  _dragStartHeightVh: SHEET_HALF_VH,
+  _isSheetDragging: false,
 
   onLoad(options) {
     const imagePath = decodeURIComponent(options.imagePath || '')
@@ -99,7 +109,8 @@ Page({
       text,
       fontSize,
       opacity: opacityDisplay / 100,
-      spacing,
+      spacingX: spacing,
+      spacingY: spacing,
       angle,
       color: currentColor
     })
@@ -166,6 +177,48 @@ Page({
     this.setData({ currentColor: color }, () => this._scheduleRender(0))
   },
 
+  toggleSheet() {
+    if (this._isSheetDragging) return
+    const nextExpanded = !this.data.sheetExpanded
+    this.setData({
+      sheetExpanded: nextExpanded,
+      sheetHeightVh: nextExpanded ? SHEET_EXPANDED_VH : SHEET_HALF_VH
+    })
+  },
+
+  onSheetDragStart(e) {
+    const touch = e.touches && e.touches[0]
+    if (!touch) return
+    this._dragStartY = touch.clientY
+    this._dragStartHeightVh = this.data.sheetHeightVh
+    this._isSheetDragging = false
+    this.setData({ sheetDragging: true })
+  },
+
+  onSheetDragMove(e) {
+    const touch = e.touches && e.touches[0]
+    if (!touch) return
+    const windowHeight = wx.getWindowInfo().windowHeight || 1
+    const deltaY = touch.clientY - this._dragStartY
+    const deltaVh = (deltaY / windowHeight) * 100
+    const nextHeightVh = clampNumber(this._dragStartHeightVh - deltaVh, SHEET_MIN_VH, SHEET_MAX_VH, SHEET_HALF_VH)
+    if (Math.abs(deltaY) > 4) this._isSheetDragging = true
+    this.setData({ sheetHeightVh: nextHeightVh })
+  },
+
+  onSheetDragEnd() {
+    const midpoint = (SHEET_HALF_VH + SHEET_EXPANDED_VH) / 2
+    const nextExpanded = this.data.sheetHeightVh >= midpoint
+    this.setData({
+      sheetDragging: false,
+      sheetExpanded: nextExpanded,
+      sheetHeightVh: nextExpanded ? SHEET_EXPANDED_VH : SHEET_HALF_VH
+    })
+    setTimeout(() => {
+      this._isSheetDragging = false
+    }, 0)
+  },
+
   onUnload() {
     if (this._debounceTimer) clearTimeout(this._debounceTimer)
     if (this._renderTimer) clearTimeout(this._renderTimer)
@@ -214,7 +267,8 @@ Page({
         text,
         fontSize: fontSize * scaleFactor,
         opacity: opacityDisplay / 100,
-        spacing: spacing * scaleFactor,
+        spacingX: spacing * scaleFactor,
+        spacingY: spacing * scaleFactor,
         angle,
         color: currentColor
       })
