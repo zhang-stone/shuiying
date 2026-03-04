@@ -13,7 +13,7 @@ const DEFAULT_PARAMS = {
   fontSize: 24,
   opacityDisplay: 90,
   spacing: DEFAULT_SPACING,
-  angle: -30,
+  angle: -45,
   currentColor: '#000000'
 }
 

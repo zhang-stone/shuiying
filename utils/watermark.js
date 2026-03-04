@@ -83,8 +83,9 @@ function drawWatermark(options) {
 
   const gapXPx = clampNumber(spacingX, 0, 200, 0)
   const gapYPx = clampNumber(spacingY, 0, 200, 0)
-  const stepX = Math.max(minStepPx, diagW + gapXPx)
-  const stepY = Math.max(minStepPx, diagH + gapYPx)
+  const tightenPx = computeTightenPx(fontSize, diagW, diagH)
+  const stepX = Math.max(minStepPx, diagW + gapXPx - tightenPx)
+  const stepY = Math.max(minStepPx, diagH + gapYPx - tightenPx)
 
   // 扩展范围防止旋转后边缘空白
   const expandRange = Math.max(drawRect.width, drawRect.height)
@@ -175,4 +176,11 @@ function clampNumber(value, min, max, fallback) {
   const num = Number(value)
   if (!Number.isFinite(num)) return fallback
   return Math.min(max, Math.max(min, num))
+}
+
+function computeTightenPx(fontSize, diagW, diagH) {
+  // 让 spacing=0 时更贴近字形边缘，同时避免步长过小导致绘制爆炸
+  const byFont = fontSize * 0.5
+  const byDiag = Math.min(diagW, diagH) * 0.38
+  return Math.max(0, Math.min(byFont, byDiag))
 }
