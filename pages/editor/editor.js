@@ -1,7 +1,7 @@
 const { drawWatermark } = require('../../utils/watermark')
 const { authorizeWritePhotosAlbum } = require('../../utils/permission')
 
-const DEFAULT_SPACING = 1
+const DEFAULT_SPACING = 0
 const MAX_EXPORT_SIDE = 4096
 
 const DEFAULT_PARAMS = {
@@ -144,7 +144,8 @@ Page({
   },
 
   onFontSizeChange(e) {
-    this.setData({ fontSize: Number(e.detail.value) }, () => this._scheduleRender(0))
+    const fontSize = clampNumber(e.detail.value, 12, 60, DEFAULT_PARAMS.fontSize)
+    this.setData({ fontSize }, () => this._scheduleRender(0))
   },
 
   onOpacityChange(e) {
@@ -152,7 +153,7 @@ Page({
   },
 
   onSpacingChange(e) {
-    const spacing = Math.max(1, Number(e.detail.value) || DEFAULT_SPACING)
+    const spacing = Math.max(0, Number(e.detail.value) || DEFAULT_SPACING)
     this.setData({ spacing }, () => this._scheduleRender(0))
   },
 
@@ -213,7 +214,7 @@ Page({
         text,
         fontSize: fontSize * scaleFactor,
         opacity: opacityDisplay / 100,
-        spacing,
+        spacing: spacing * scaleFactor,
         angle,
         color: currentColor
       })
@@ -257,4 +258,10 @@ function computeSafeExportSize(width, height, maxSide) {
     width: Math.round(width * ratio),
     height: Math.round(height * ratio)
   }
+}
+
+function clampNumber(value, min, max, fallback) {
+  const num = Number(value)
+  if (!Number.isFinite(num)) return fallback
+  return Math.min(max, Math.max(min, num))
 }
