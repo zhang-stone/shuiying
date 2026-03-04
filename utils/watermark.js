@@ -27,10 +27,12 @@ function drawWatermark(options) {
     text = '仅供查阅',
     fontSize = 24,
     opacity = 0.2,
-    spacing = 1.0,
+    spacing = 8,
     angle = -30,
     color = '#000000',
-    imageFit = 'contain'
+    imageFit = 'contain',
+    maxTiles = 2200,
+    minStepPx = 24
   } = options
 
   const ctx = canvas.getContext('2d')
@@ -75,8 +77,9 @@ function drawWatermark(options) {
   const diagW = Math.abs(textW * Math.cos(rad)) + Math.abs(textH * Math.sin(rad))
   const diagH = Math.abs(textW * Math.sin(rad)) + Math.abs(textH * Math.cos(rad))
 
-  const spacingX = (diagW + fontSize * 2) * spacing
-  const spacingY = (diagH + fontSize * 2) * spacing
+  const safeSpacing = clampNumber(spacing, 1, 20, 8)
+  const spacingX = Math.max(minStepPx, (diagW + fontSize * 2) * safeSpacing)
+  const spacingY = Math.max(minStepPx, (diagH + fontSize * 2) * safeSpacing)
 
   // 扩展范围防止旋转后边缘空白
   const expandRange = Math.max(drawRect.width, drawRect.height)
@@ -86,14 +89,22 @@ function drawWatermark(options) {
   const endX = drawRect.x + drawRect.width + expandRange
   const endY = drawRect.y + drawRect.height + expandRange
 
+  let tileCount = 0
+  let exceededMaxTiles = false
   for (let y = startY; y < endY; y += spacingY) {
     for (let x = startX; x < endX; x += spacingX) {
+      if (tileCount >= maxTiles) {
+        exceededMaxTiles = true
+        break
+      }
       ctx.save()
       ctx.translate(x, y)
       ctx.rotate(rad)
       ctx.fillText(text, 0, 0)
       ctx.restore()
+      tileCount += 1
     }
+    if (exceededMaxTiles) break
   }
 
   ctx.restore()
@@ -144,3 +155,9 @@ function getImageDrawRect(options) {
 }
 
 module.exports = { drawWatermark, getImageDrawRect }
+
+function clampNumber(value, min, max, fallback) {
+  const num = Number(value)
+  if (!Number.isFinite(num)) return fallback
+  return Math.min(max, Math.max(min, num))
+}

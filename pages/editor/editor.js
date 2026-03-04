@@ -1,11 +1,14 @@
 const { drawWatermark } = require('../../utils/watermark')
 const { authorizeWritePhotosAlbum } = require('../../utils/permission')
 
+const DEFAULT_SPACING = 1
+const MAX_EXPORT_SIDE = 4096
+
 const DEFAULT_PARAMS = {
   text: '仅供查阅',
   fontSize: 24,
-  opacityDisplay: 20,
-  spacing: 1.0,
+  opacityDisplay: 90,
+  spacing: DEFAULT_SPACING,
   angle: -30,
   currentColor: '#000000'
 }
@@ -35,9 +38,16 @@ Page({
   _previewImageW: 0,
   _previewImageH: 0,
   _debounceTimer: null,
+  _renderTimer: null,
+  _isRendering: false,
+  _renderQueued: false,
 
   onLoad(options) {
     const imagePath = decodeURIComponent(options.imagePath || '')
+    if (!imagePath) {
+      wx.showToast({ title: '图片路径无效', icon: 'none' })
+      return
+    }
     this.setData({ imagePath })
     this._initCanvas(imagePath)
   },
@@ -69,7 +79,7 @@ Page({
       const img = canvas.createImage()
       img.onload = () => {
         this._image = img
-        this._render()
+        this._scheduleRender(0)
       }
       img.onerror = () => {
         wx.showToast({ title: '图片加载失败', icon: 'none' })
@@ -102,7 +112,30 @@ Page({
 
   _debouncedRender() {
     if (this._debounceTimer) clearTimeout(this._debounceTimer)
-    this._debounceTimer = setTimeout(() => this._render(), 300)
+    this._debounceTimer = setTimeout(() => this._scheduleRender(0), 200)
+  },
+
+  _scheduleRender(delay = 16) {
+    if (this._renderTimer) clearTimeout(this._renderTimer)
+    this._renderTimer = setTimeout(() => {
+      this._renderTimer = null
+      if (this._isRendering) {
+        this._renderQueued = true
+        return
+      }
+
+      this._isRendering = true
+      try {
+        this._render()
+      } finally {
+        this._isRendering = false
+      }
+
+      if (this._renderQueued) {
+        this._renderQueued = false
+        this._scheduleRender(16)
+      }
+    }, delay)
   },
 
   onTextInput(e) {
@@ -111,24 +144,33 @@ Page({
   },
 
   onFontSizeChange(e) {
-    this.setData({ fontSize: e.detail.value }, () => this._render())
+    this.setData({ fontSize: Number(e.detail.value) }, () => this._scheduleRender(0))
   },
 
   onOpacityChange(e) {
-    this.setData({ opacityDisplay: e.detail.value }, () => this._render())
+    this.setData({ opacityDisplay: Number(e.detail.value) }, () => this._scheduleRender(0))
   },
 
   onSpacingChange(e) {
-    this.setData({ spacing: e.detail.value }, () => this._render())
+    const spacing = Math.max(1, Number(e.detail.value) || DEFAULT_SPACING)
+    this.setData({ spacing }, () => this._scheduleRender(0))
   },
 
   onAngleChange(e) {
-    this.setData({ angle: e.detail.value }, () => this._render())
+    this.setData({ angle: Number(e.detail.value) }, () => this._scheduleRender(0))
   },
 
   onColorChange(e) {
     const color = e.currentTarget.dataset.color
-    this.setData({ currentColor: color }, () => this._render())
+    this.setData({ currentColor: color }, () => this._scheduleRender(0))
+  },
+
+  onUnload() {
+    if (this._debounceTimer) clearTimeout(this._debounceTimer)
+    if (this._renderTimer) clearTimeout(this._renderTimer)
+    this._canvas = null
+    this._ctx = null
+    this._image = null
   },
 
   async saveImage() {
@@ -151,13 +193,14 @@ Page({
 
     const originW = img.width
     const originH = img.height
+    const { width: exportW, height: exportH } = computeSafeExportSize(originW, originH, MAX_EXPORT_SIDE)
     const previewImageW = this._previewImageW || this._canvasW
-    const scaleFactor = originW / previewImageW
+    const scaleFactor = exportW / previewImageW
 
     const offCanvas = wx.createOffscreenCanvas({
       type: '2d',
-      width: originW,
-      height: originH
+      width: exportW,
+      height: exportH
     })
 
     const offImg = offCanvas.createImage()
@@ -165,8 +208,8 @@ Page({
       drawWatermark({
         canvas: offCanvas,
         image: offImg,
-        canvasW: originW,
-        canvasH: originH,
+        canvasW: exportW,
+        canvasH: exportH,
         text,
         fontSize: fontSize * scaleFactor,
         opacity: opacityDisplay / 100,
@@ -204,3 +247,14 @@ Page({
     offImg.src = this.data.imagePath
   }
 })
+
+function computeSafeExportSize(width, height, maxSide) {
+  if (!width || !height) return { width: maxSide, height: maxSide }
+  const largestSide = Math.max(width, height)
+  if (largestSide <= maxSide) return { width, height }
+  const ratio = maxSide / largestSide
+  return {
+    width: Math.round(width * ratio),
+    height: Math.round(height * ratio)
+  }
+}

@@ -1,10 +1,10 @@
 <view class="page">
   <view class="hero">
     <view class="hero-icon-wrap">
-      <view class="icon-shield"></view>
+      <image class="icon-shield" src="/images/shield.png" mode="aspectFit" />
     </view>
     <text class="hero-title">隐私水印保护</text>
-    <text class="hero-subtitle">为您的证件、执照添加专属防盗用保护，守护信息安全。</text>
+    <text class="hero-subtitle">为您的证件添加专属防盗用保护，守护信息安全。</text>
   </view>
 
   <view class="upload-panel">
@@ -31,8 +31,6 @@
         <text class="secondary-subtitle">使用相机拍摄新照片</text>
       </view>
     </view>
-
-    <text class="upload-tip">支持 JPG、PNG 格式 · 本地处理，隐私安全</text>
   </view>
 
   <view class="advantage-section">
