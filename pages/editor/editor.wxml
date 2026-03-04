@@ -1,99 +1,115 @@
-<view class="container">
-  <!-- 预览区 -->
-  <view class="preview-area">
-    <view class="canvas-container">
-      <canvas id="watermarkCanvas" type="2d" class="canvas" />
-    </view>
-  </view>
-
-  <!-- 控制面板 -->
-  <scroll-view class="control-panel" scroll-y>
-    <!-- 拖动指示条 -->
-    <view class="drag-indicator" />
-
-    <!-- 水印文字 -->
-    <view class="section">
-      <text class="section-label"><text class="label-prefix">T</text> 水印文字</text>
-      <input
-        class="text-input"
-        value="{{text}}"
-        placeholder="仅供验证使用，他用无效"
-        maxlength="20"
-        bindinput="onTextInput"
-      />
-    </view>
-
-    <!-- 水印颜色 -->
-    <view class="section">
-      <text class="section-label">水印颜色</text>
-      <view class="color-list">
-        <view
-          wx:for="{{colors}}"
-          wx:key="value"
-          class="color-dot {{currentColor === item.value ? 'active' : ''}}"
-          style="background:{{item.value}};border-color:{{item.border}}"
-          bindtap="onColorChange"
-          data-color="{{item.value}}"
-        />
+<view class="page" style="display: flex; box-sizing: content-box">
+  <scroll-view class="content" scroll-y 
+    style="display: block; box-sizing: border-box">
+    <view class="preview-card">
+      <view class="canvas-stage">
+        <canvas id="watermarkCanvas" type="2d" class="canvas" />
       </view>
     </view>
 
-    <!-- 透明度 -->
-    <view class="section">
-      <text class="section-label">≡ 透明度 ({{opacityDisplay}}%)</text>
-      <slider
-        min="5" max="80"
-        value="{{opacityDisplay}}"
-        activeColor="#7C4DFF"
-        block-color="#7C4DFF"
-        block-size="20"
-        bindchange="onOpacityChange"
-      />
-    </view>
+    <view class="content-box">
 
-    <!-- 水印大小 -->
-    <view class="section">
-      <text class="section-label">□ 水印大小</text>
-      <slider
-        min="12" max="60"
-        value="{{fontSize}}"
-        activeColor="#7C4DFF"
-        block-color="#7C4DFF"
-        block-size="20"
-        bindchange="onFontSizeChange"
-      />
-    </view>
+      <view class="section">
+        <view class="section-title-row">
+          <text class="section-icon section-icon-emphasis">T</text>
+          <text class="section-title">水印文字</text>
+        </view>
+        <input
+          class="text-input"
+          value="{{text}}"
+          placeholder="仅供验证使用，他用无效"
+          placeholder-style="color:#99a1af;"
+          maxlength="20"
+          bindinput="onTextInput"
+        />
+      </view>
 
-    <!-- 分布间距 -->
-    <view class="section">
-      <text class="section-label">⊹ 分布间距</text>
-      <slider
-        min="5" max="20"
-        step="1"
-        value="{{spacing}}"
-        activeColor="#7C4DFF"
-        block-color="#7C4DFF"
-        block-size="20"
-        bindchange="onSpacingChange"
-      />
-    </view>
+      <view class="section">
+        <text class="section-title">字体颜色</text>
+        <view class="color-list">
+          <view
+            wx:for="{{colors}}"
+            wx:key="value"
+            class="color-dot {{currentColor === item.value ? 'active' : ''}}"
+            style="background:{{item.value}};border-color:{{item.border}}"
+            bindtap="onColorChange"
+            data-color="{{item.value}}"
+          />
+        </view>
+      </view>
 
-    <!-- 倾斜角度 -->
-    <view class="section">
-      <text class="section-label">↺ 倾斜角度 ({{angle}}°)</text>
-      <slider
-        min="-90" max="90"
-        value="{{angle}}"
-        activeColor="#7C4DFF"
-        block-color="#7C4DFF"
-        block-size="20"
-        bindchange="onAngleChange"
-      />
+      <view class="section">
+        <view class="section-title-row">
+          <text class="section-icon">◫</text>
+          <text class="section-title">透明度 ({{opacityDisplay}}%)</text>
+        </view>
+        <slider
+          min="5"
+          max="80"
+          value="{{opacityDisplay}}"
+          activeColor="#8b5cf6"
+          backgroundColor="#d1d5db"
+          block-color="#8b5cf6"
+          block-size="18"
+          bindchange="onOpacityChange"
+        />
+      </view>
+
+      <view class="section">
+        <view class="section-title-row">
+          <text class="section-icon">□</text>
+          <text class="section-title">水印大小</text>
+        </view>
+        <slider
+          min="12"
+          max="60"
+          value="{{fontSize}}"
+          activeColor="#8b5cf6"
+          backgroundColor="#d1d5db"
+          block-color="#8b5cf6"
+          block-size="18"
+          bindchange="onFontSizeChange"
+        />
+      </view>
+
+      <view class="section">
+        <view class="section-title-row">
+          <text class="section-icon">⊹</text>
+          <text class="section-title">分布间距</text>
+        </view>
+        <slider
+          min="5"
+          max="20"
+          step="1"
+          value="{{spacing}}"
+          activeColor="#8b5cf6"
+          backgroundColor="#d1d5db"
+          block-color="#8b5cf6"
+          block-size="18"
+          bindchange="onSpacingChange"
+        />
+      </view>
+
+      <view class="section section-last">
+        <view class="section-title-row">
+          <text class="section-icon">↺</text>
+          <text class="section-title">倾斜角度 ({{angle}}°)</text>
+        </view>
+        <slider
+          min="-90"
+          max="90"
+          value="{{angle}}"
+          activeColor="#8b5cf6"
+          backgroundColor="#d1d5db"
+          block-color="#8b5cf6"
+          block-size="18"
+          bindchange="onAngleChange"
+        />
+      </view>
     </view>
   </scroll-view>
 
-  <!-- 底部固定保存按钮 -->
   <view class="bottom-bar">
-    <button class="btn-save" bindtap="saveImage">⬇ 保存到相册</button>
+    <button class="btn-save" bindtap="saveImage">↓ 保存到相册</button>
   </view>
 </view>

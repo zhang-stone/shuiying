@@ -32,6 +32,8 @@ Page({
   _image: null,
   _canvasW: 0,
   _canvasH: 0,
+  _previewImageW: 0,
+  _previewImageH: 0,
   _debounceTimer: null,
 
   onLoad(options) {
@@ -79,7 +81,7 @@ Page({
   _render() {
     if (!this._canvas || !this._image) return
     const { text, fontSize, opacityDisplay, spacing, angle, currentColor } = this.data
-    drawWatermark({
+    const drawMeta = drawWatermark({
       canvas: this._canvas,
       image: this._image,
       canvasW: this._canvasW,
@@ -91,6 +93,11 @@ Page({
       angle,
       color: currentColor
     })
+
+    if (drawMeta) {
+      this._previewImageW = drawMeta.drawW
+      this._previewImageH = drawMeta.drawH
+    }
   },
 
   _debouncedRender() {
@@ -144,7 +151,8 @@ Page({
 
     const originW = img.width
     const originH = img.height
-    const scaleFactor = originW / this._canvasW
+    const previewImageW = this._previewImageW || this._canvasW
+    const scaleFactor = originW / previewImageW
 
     const offCanvas = wx.createOffscreenCanvas({
       type: '2d',

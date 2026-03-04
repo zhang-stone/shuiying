@@ -16,6 +16,7 @@
  * @param {number} options.spacing  - 分布间距倍率（默认 1.0）
  * @param {number} options.angle    - 倾斜角度 (度)
  * @param {string} options.color    - 字体颜色 (CSS 颜色值)
+ * @param {string} options.imageFit - 图片适配方式，默认 contain
  */
 function drawWatermark(options) {
   const {
@@ -28,7 +29,8 @@ function drawWatermark(options) {
     opacity = 0.2,
     spacing = 1.0,
     angle = -30,
-    color = '#000000'
+    color = '#000000',
+    imageFit = 'contain'
   } = options
 
   const ctx = canvas.getContext('2d')
@@ -36,11 +38,26 @@ function drawWatermark(options) {
   // 清空画布
   ctx.clearRect(0, 0, canvasW, canvasH)
 
-  // 绘制原图（铺满画布）
-  ctx.drawImage(image, 0, 0, canvasW, canvasH)
+  const imageW = image.width || canvasW
+  const imageH = image.height || canvasH
+  const drawRect = getImageDrawRect({
+    imageW,
+    imageH,
+    canvasW,
+    canvasH,
+    imageFit
+  })
+
+  // 绘制原图（默认等比显示）
+  ctx.drawImage(image, drawRect.x, drawRect.y, drawRect.width, drawRect.height)
 
   // 设置水印样式
   ctx.save()
+  // 仅在图片实际区域绘制水印，避免出现在黑边区域
+  ctx.beginPath()
+  ctx.rect(drawRect.x, drawRect.y, drawRect.width, drawRect.height)
+  ctx.clip()
+
   ctx.globalAlpha = opacity
   ctx.fillStyle = color
   ctx.font = `${fontSize}px sans-serif`
@@ -62,12 +79,12 @@ function drawWatermark(options) {
   const spacingY = (diagH + fontSize * 2) * spacing
 
   // 扩展范围防止旋转后边缘空白
-  const expandRange = Math.max(canvasW, canvasH)
+  const expandRange = Math.max(drawRect.width, drawRect.height)
 
-  const startX = -expandRange
-  const startY = -expandRange
-  const endX = canvasW + expandRange
-  const endY = canvasH + expandRange
+  const startX = drawRect.x - expandRange
+  const startY = drawRect.y - expandRange
+  const endX = drawRect.x + drawRect.width + expandRange
+  const endY = drawRect.y + drawRect.height + expandRange
 
   for (let y = startY; y < endY; y += spacingY) {
     for (let x = startX; x < endX; x += spacingX) {
@@ -80,6 +97,50 @@ function drawWatermark(options) {
   }
 
   ctx.restore()
+
+  return {
+    drawX: drawRect.x,
+    drawY: drawRect.y,
+    drawW: drawRect.width,
+    drawH: drawRect.height
+  }
 }
 
-module.exports = { drawWatermark }
+function getImageDrawRect(options) {
+  const {
+    imageW,
+    imageH,
+    canvasW,
+    canvasH,
+    imageFit = 'contain'
+  } = options
+
+  if (!imageW || !imageH || !canvasW || !canvasH) {
+    return { x: 0, y: 0, width: canvasW, height: canvasH }
+  }
+
+  if (imageFit === 'fill') {
+    return { x: 0, y: 0, width: canvasW, height: canvasH }
+  }
+
+  const imageRatio = imageW / imageH
+  const canvasRatio = canvasW / canvasH
+
+  let width
+  let height
+
+  if (imageRatio > canvasRatio) {
+    width = canvasW
+    height = canvasW / imageRatio
+  } else {
+    height = canvasH
+    width = canvasH * imageRatio
+  }
+
+  const x = (canvasW - width) / 2
+  const y = (canvasH - height) / 2
+
+  return { x, y, width, height }
+}
+
+module.exports = { drawWatermark, getImageDrawRect }

@@ -1,6 +1,10 @@
 Page({
-  chooseImage() {
-    this._chooseImage(['album', 'camera'])
+  chooseFromAlbum() {
+    this._chooseImage(['album'])
+  },
+
+  chooseFromCamera() {
+    this._chooseImage(['camera'])
   },
 
   _chooseImage(sourceType) {

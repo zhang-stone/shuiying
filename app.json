@@ -5,9 +5,9 @@
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#1a1a2e",
+    "navigationBarBackgroundColor": "#f5f6fa",
     "navigationBarTitleText": "隐私水印",
-    "navigationBarTextStyle": "white"
+    "navigationBarTextStyle": "black"
   },
   "permission": {
     "scope.writePhotosAlbum": {
